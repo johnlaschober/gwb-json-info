@@ -40,7 +40,7 @@ function concatGroupJson()
 					{
 						if (indexStack.length == 0)
 						{
-							var concattedJSON = "";
+						    concattedJSON = "";
 							concattedJSON = '{"members":[';
 							for (j = 0; j < allJSON.length; j++)
 							{
@@ -79,31 +79,38 @@ function concatGroupJson()
 	//setTimeout(concatGroupJson, 1000 * 60 * 30); // 30 minute refresh in milliseconds
 }
 
-
 concatGroupJson();
-
 
 var server = http.createServer(function (request, response)  // On user connect
 {
     //response.writeHead(200, { "Content-Type": "text/plain" });
     try
     {
-        var importedJSON = JSON.parse(fs.readFileSync('groupJSON.json', 'utf8'));
-        response.write(JSON.stringify(importedJSON, null, 4));
-		try
-		{
-			var lastUpdated = fs.readFileSync('lastUpdated.txt', 'utf8');
-			console.log(lastUpdated);
-		}
-		catch (err){}
+		response.write(concattedJSON);
+        
+		
 		response.end();
     }
     catch (err)
     {
-		response.writeHead(200, { "Content-Type": "text/plain" });
-        response.write("Something went wrong... " + err);
-		response.end();
+		try
+		{
+			var importedJSON = JSON.parse(fs.readFileSync('groupJSON.json', 'utf8'));
+			response.write(JSON.stringify(importedJSON, null, 4));
+		}
+		catch (err) 
+		{
+			response.writeHead(200, { "Content-Type": "text/plain" });
+			response.write("Something went wrong... " + err);
+		}
     }
+	try
+	{
+		var lastUpdated = fs.readFileSync('lastUpdated.txt', 'utf8');
+		console.log("Last updated: " + lastUpdated);
+	}
+	catch (err){}
+	response.end();
 });
 
 var port = process.env.PORT || 80;
